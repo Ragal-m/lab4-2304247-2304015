@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ title|default('Search books') }} | Library</title>
+<script src="{{ url_for('static', filename='theme.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='lab4.css') }}"></head>
+<body class="lab-body"><main class="lab-shell">
+<header class="lab-header"><div><a class="brand" href="{{ url_for('search_books') }}">THE READING ROOM <span>Library</span></a><p>Explore the collection. Follow every story.</p></div>
+<div class="account">{{ session.get('name', 'Reader') }} · <a href="{{ url_for('todo_list') }}">To-do</a> · <a href="{{ url_for('logout') }}">Log out</a><button id="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">🌙 Dark mode</button></div></header>
+{% include 'library_nav.html' %}
+{% block content %}{% endblock %}
+</main></body></html>

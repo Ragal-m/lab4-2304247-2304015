@@ -1,0 +1,5 @@
+{% extends 'lab4_base.html' %}{% from 'table.html' import data_table %}
+{% block content %}
+<div class="page-heading"><p class="eyebrow">THE COLLECTION</p><h1>{{ title }}</h1><p>{{ subtitle }}</p></div>
+{% for section in sections %}<section class="lab-card"><h2>{{ section.heading }}</h2>{{ data_table(section.rows, section.columns) }}</section>{% endfor %}
+{% endblock %}

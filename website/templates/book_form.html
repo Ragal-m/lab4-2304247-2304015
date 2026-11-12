@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Book' if book_id else 'Add Book' }}{% endblock %}
+{% block content %}
+<div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-xl shadow border border-slate-200 dark:border-slate-700 transition-colors">
+  <h2 class="text-2xl font-bold text-center mb-6 text-slate-800 dark:text-white">{{ 'Edit book #' ~ book_id if book_id else 'Add a book' }}</h2>
+
+  <div class="mb-4">{% include "_flash.html" %}</div>
+
+  <div id="client-errors" class="hidden mb-4 p-3 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg text-sm space-y-1"></div>
+
+  {% if errors %}
+  <div class="mb-4 p-3 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg text-sm space-y-1">
+    {% for err in errors %}
+      <p>• {{ err }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if not authors %}
+  <div class="mb-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 rounded-lg text-sm">
+    There are no authors yet. <a href="{{ url_for('add_author') }}" class="font-semibold underline">Add an author</a> first.
+  </div>
+  {% endif %}
+
+  <form id="book-form" method="POST" enctype="multipart/form-data" class="space-y-4">
+    <div>
+      <label for="title" class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Title</label>
+      <input type="text" id="title" name="title" value="{{ form_data.title }}" maxlength="200"
+             class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+    </div>
+    <div>
+      <label for="price" class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Price</label>
+      <input type="number" id="price" name="price" value="{{ form_data.price }}" min="0" step="0.01"
+             class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+    </div>
+    <div>
+      <label for="author_id" class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Author</label>
+      <select id="author_id" name="author_id"
+              class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+        <option value="">Choose an author</option>
+        {% for author in authors %}
+          <option value="{{ author.author_id }}" {% if form_data.author_id|string == author.author_id|string %}selected{% endif %}>
+            {{ author.author_id }} — {{ author.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label for="publish_year">Publication year</label>
+      <input class="lab-input" type="number" id="publish_year" name="publish_year" min="1" max="9999" value="{{ form_data.publish_year }}" required>
+    </div>
+    {% for field, label, choices in [('publisher_id', 'Publisher', publishers), ('category_id', 'Category', categories)] %}
+    <div>
+      <label for="{{ field }}">{{ label }}</label>
+      <select class="lab-input" id="{{ field }}" name="{{ field }}" required>
+        <option value="">Choose a {{ label|lower }}</option>
+        {% for choice in choices %}
+        <option value="{{ choice[field] }}" {% if form_data[field]|string == choice[field]|string %}selected{% endif %}>{{ choice.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    {% endfor %}
+    <div>
+      <label for="image" class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Cover image <span class="font-normal text-slate-400">(optional)</span></label>
+      {% if image %}
+        <div class="flex items-center gap-3 mb-2">
+          <img src="{{ url_for('static', filename='uploads/' ~ image) }}" alt="Current cover"
+               class="w-12 h-16 object-cover rounded border border-slate-200 dark:border-slate-600">
+          <label class="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+            <input type="checkbox" name="remove_image" value="1"> Remove current cover
+          </label>
+        </div>
+      {% endif %}
+      <input type="file" id="image" name="image" accept=".png,.jpg,.jpeg,.jfif,.gif,.webp"
+             class="w-full text-sm text-slate-600 dark:text-slate-300 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-slate-100 dark:file:bg-slate-700 file:text-slate-700 dark:file:text-slate-200 file:text-xs file:font-medium">
+      <p class="mt-1 text-[11px] text-slate-400">PNG, JPG, JFIF, GIF or WEBP, up to 5 MB.</p>
+    </div>
+    <div class="flex gap-2 pt-2">
+      <button type="submit" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-150">
+        {{ 'Save changes' if book_id else 'Add book' }}
+      </button>
+      <a href="{{ url_for('library') }}" class="py-2.5 px-4 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-colors">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+document.getElementById('book-form').addEventListener('submit', function(e) {
+  const errBox = document.getElementById('client-errors');
+  errBox.innerHTML = '';
+  const messages = [];
+
+  const title = document.getElementById('title').value.trim();
+  const price = document.getElementById('price').value.trim();
+  const authorId = document.getElementById('author_id').value;
+  const file = document.getElementById('image').files[0];
+
+  if (!title) messages.push('Title is required');
+  else if (title.length > 200) messages.push('Title is too long');
+  if (!price) messages.push('Price is required');
+  else if (isNaN(Number(price)) || Number(price) < 0) messages.push('Price must be a number of 0 or more');
+  if (!authorId) messages.push('Author is required');
+  if (file && !/\.(png|jpe?g|jfif|gif|webp)$/i.test(file.name)) messages.push('Image must be a PNG, JPG, JFIF, GIF or WEBP file');
+  if (file && file.size > 5 * 1024 * 1024) messages.push('Image is too large (max 5 MB)');
+
+  if (messages.length > 0) {
+    e.preventDefault();
+    errBox.innerHTML = messages.map(m => `<p>• ${m}</p>`).join('');
+    errBox.classList.remove('hidden');
+  }
+});
+</script>
+{% endblock %}

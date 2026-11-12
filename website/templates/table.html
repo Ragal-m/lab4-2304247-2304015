@@ -1,0 +1,5 @@
+{% macro data_table(rows, columns) %}
+<div class="table-wrap"><table><thead><tr>{% for column in columns %}<th scope="col">{{ column|replace('_',' ')|title }}</th>{% endfor %}</tr></thead>
+<tbody>{% for row in rows %}<tr>{% for column in columns %}<td>{{ row[column] if row[column] is not none else '—' }}</td>{% endfor %}</tr>
+{% else %}<tr><td colspan="{{ columns|length }}" class="empty">No matching records.</td></tr>{% endfor %}</tbody></table></div>
+{% endmacro %}

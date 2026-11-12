@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit Author' if author_id else 'Add Author' }}{% endblock %}
+{% block content %}
+<div class="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-xl shadow border border-slate-200 dark:border-slate-700 transition-colors">
+  <h2 class="text-2xl font-bold text-center mb-6 text-slate-800 dark:text-white">{{ 'Edit author #' ~ author_id if author_id else 'Add an author' }}</h2>
+
+  <div class="mb-4">{% include "_flash.html" %}</div>
+
+  <div id="client-errors" class="hidden mb-4 p-3 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg text-sm space-y-1"></div>
+
+  {% if errors %}
+  <div class="mb-4 p-3 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg text-sm space-y-1">
+    {% for err in errors %}
+      <p>• {{ err }}</p>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <form id="author-form" method="POST" enctype="multipart/form-data" novalidate class="space-y-4">
+    <div>
+      <label for="name" class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Name</label>
+      <input type="text" id="name" name="name" value="{{ form_data.name }}" maxlength="100"
+             class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+    </div>
+    <div>
+      <label for="country" class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Country</label>
+      <input type="text" id="country" name="country" value="{{ form_data.country }}" maxlength="50"
+             class="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+    </div>
+    <div>
+      <label for="image" class="block text-sm font-medium mb-1 text-slate-700 dark:text-slate-300">Photo <span class="font-normal text-slate-400">(optional)</span></label>
+      {% if image %}
+        <div class="flex items-center gap-3 mb-2">
+          <img src="{{ url_for('static', filename='uploads/' ~ image) }}" alt="Current photo"
+               class="w-12 h-12 object-cover rounded-full border border-slate-200 dark:border-slate-600">
+          <label class="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+            <input type="checkbox" name="remove_image" value="1"> Remove current photo
+          </label>
+        </div>
+      {% endif %}
+      <input type="file" id="image" name="image" accept=".png,.jpg,.jpeg,.jfif,.gif,.webp"
+             class="w-full text-sm text-slate-600 dark:text-slate-300 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-slate-100 dark:file:bg-slate-700 file:text-slate-700 dark:file:text-slate-200 file:text-xs file:font-medium">
+      <p class="mt-1 text-[11px] text-slate-400">PNG, JPG, JFIF, GIF or WEBP, up to 5 MB.</p>
+    </div>
+    <div class="flex gap-2 pt-2">
+      <button type="submit" class="flex-1 py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-150">
+        {{ 'Save changes' if author_id else 'Add author' }}
+      </button>
+      <a href="{{ url_for('library') }}" class="py-2.5 px-4 border border-slate-300 dark:border-slate-600 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 font-medium transition-colors">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+document.getElementById('author-form').addEventListener('submit', function(e) {
+  const errBox = document.getElementById('client-errors');
+  errBox.innerHTML = '';
+  const messages = [];
+
+  const name = document.getElementById('name').value.trim();
+  const country = document.getElementById('country').value.trim();
+  const file = document.getElementById('image').files[0];
+
+  if (!name) messages.push('Name is required');
+  else if (name.length > 100) messages.push('Name is too long');
+  if (!country) messages.push('Country is required');
+  else if (country.length > 50) messages.push('Country is too long');
+  if (file && !/\.(png|jpe?g|jfif|gif|webp)$/i.test(file.name)) messages.push('Image must be a PNG, JPG, JFIF, GIF or WEBP file');
+  if (file && file.size > 5 * 1024 * 1024) messages.push('Image is too large (max 5 MB)');
+
+  if (messages.length > 0) {
+    e.preventDefault();
+    errBox.innerHTML = messages.map(m => `<p>• ${m}</p>`).join('');
+    errBox.classList.remove('hidden');
+  }
+});
+</script>
+{% endblock %}

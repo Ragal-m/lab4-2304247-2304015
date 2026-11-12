@@ -1,0 +1,16 @@
+{% extends 'lab4_base.html' %}{% from 'table.html' import data_table %}
+{% block content %}
+<div class="page-heading"><p class="eyebrow">FIND YOUR NEXT READ</p><h1>Search the shelves</h1><p>Find a title, set your budget and explore a category.</p></div>
+<section class="lab-card"><form method="get" action="{{ url_for('search_books') }}" class="search-grid">
+<div class="keyword"><label for="keyword">Title keyword</label><input id="keyword" name="keyword" maxlength="200" placeholder="e.g. Palace" value="{{ filters.keyword }}"></div>
+<div><label for="min_price">Minimum price</label><input id="min_price" name="min_price" type="number" min="0" max="99999999.99" step="0.01" placeholder="0.00" value="{{ filters.min_price }}"></div>
+<div><label for="max_price">Maximum price</label><input id="max_price" name="max_price" type="number" min="0" max="99999999.99" step="0.01" placeholder="No maximum" value="{{ filters.max_price }}"></div>
+<div><label for="category_id">Category</label><select id="category_id" name="category_id" onchange="this.form.requestSubmit()"><option value="">All categories</option>{% for category in categories %}<option value="{{ category.category_id }}" {% if filters.category_id == category.category_id|string %}selected{% endif %}>{{ category.name }}</option>{% endfor %}</select></div>
+<div class="actions"><button type="submit">Search books</button><a href="{{ url_for('search_books') }}">Reset filters</a></div>
+</form>
+{% if errors %}<div class="errors" role="alert"><ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul></div>{% endif %}
+</section>
+<section class="lab-card"><div class="section-title"><h2>Matching books</h2><span>{{ books|length }} result{{ '' if books|length == 1 else 's' }} · Cheapest first</span></div>
+{{ data_table(books, ['book_id','title','price','publish_year','author','category']) }}
+</section>
+{% endblock %}

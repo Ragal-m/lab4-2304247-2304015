@@ -1,0 +1,5 @@
+<nav class="lab-nav" aria-label="Library navigation">
+{% for endpoint, label in [('search_books','Search books'),('catalogue','Catalogue'),('library_reports','Reports'),('library_loans','Loans'),('most_borrowed','Most borrowed'),('authors_and_books','Authors & books'),('library','Manage library')] %}
+<a href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint %}aria-current="page"{% endif %}>{{ label }}</a>
+{% endfor %}
+</nav>
