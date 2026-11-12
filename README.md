@@ -1,110 +1,168 @@
-# Database Lab 4 - Part II: Library
+# Database Lab 4 - Part II: Library Management System
 
-**Team:** Mahmoud Hassan Elragal (2304247) and Marwan Tamer Hassan (2304015).
+**University:** Alexandria National University  
+**Faculty:** Faculty of Engineering  
+**Course:** Introduction to Database Systems  
+**Semester:** Fall 2026
 
-This continues our Lab 3 Flask/MySQL website and completes **Part II / Problem 2, F2.1-F2.6 and the prepared-statements bonus**. Part I (company database) is outside this project's scope.
+## Submitted by
 
-## Run step by step (Windows / PowerShell)
-
-Requires Python 3, MySQL 8.0.16+ (tested with MySQL 8.4.3), and a running MySQL server. Start MySQL in Laragon or your normal MySQL installation. Open a terminal in this project's root folder.
-
-1. Install the Python packages:
-
-   ```powershell
-   python -m venv .venv
-   .\.venv\Scripts\python.exe -m pip install -r website/requirements.txt
-   ```
-
-2. Open the MySQL client from the project root:
-
-   ```powershell
-   mysql -u root -p
-   ```
-
-   If `mysql` is not on PATH, use the MySQL command prompt supplied by Laragon, or execute its full path. Enter your own database password. At the `mysql>` prompt run, in order:
-
-   ```sql
-   SOURCE website/database/schema.sql;
-   SOURCE problem2_DDL.sql;
-   SOURCE problem2_DML.sql;
-   SOURCE problem2_Queries.sql;
-   exit;
-   ```
-
-   `schema.sql` creates the `registration` database and account/to-do tables only if missing. It preserves existing users and tasks. **The library DDL drops and recreates the `library` database**, as required for repeatable assignment setup. Re-running DDL then DML restores the original demonstration data. Run DML once per rebuild.
-
-3. Create your local configuration:
-
-   ```powershell
-   Copy-Item website/.env.example website/.env
-   ```
-
-   Edit `website/.env` to match your MySQL server:
-
-   ```dotenv
-   DB_HOST=127.0.0.1
-   DB_USER=root
-   DB_PASSWORD=your-own-mysql-password
-   DB_PORT=3306
-   DB_NAME=registration
-   LIBRARY_DB_NAME=library
-   SECRET_KEY=replace-with-a-long-random-value
-   ```
-
-   Use an empty `DB_PASSWORD=` only if your local server has no password. The MySQL user needs access to both databases. Generate a secret with `python -c "import secrets; print(secrets.token_hex(32))"`. Keep `.env` out of Git.
-
-4. Start the website from the project root:
-
-   ```powershell
-   .\.venv\Scripts\python.exe website/app.py
-   ```
-
-5. Open **http://127.0.0.1:5000**, register or sign in, then click **Library**. The library navigation links open all six new features. Direct search URL: **http://127.0.0.1:5000/library/search**. Registration retains the original email-provider validation: Gmail, iCloud, Hotmail, Yahoo or Outlook addresses. There is no seeded account; create one through Register.
-
-The new Lab 4 pages use local CSS and work without an external styling service. The preserved Lab 2/3 pages retain their original Tailwind CDN styling. Set `FLASK_DEBUG=1` only when developing locally; it is off by default.
-
-## Features and SQL mapping
-
-| Requirement | Page | Implemented behavior |
-|---|---|---|
-| F2.1 | `/library/search` | Title LIKE, inclusive min/max price BETWEEN, category dropdown, cheapest first; blank filters search all books |
-| F2.2 | `/library/catalogue` | Books with author, publisher and category names through JOINs |
-| F2.3 | `/library/reports` | Book count and average price per category, authors with at least 2 books using HAVING, total/min/max library price |
-| F2.4 | `/library/loans` | Unreturned loans with member/book names, members without loans, books never borrowed |
-| F2.5 | `/library/most-borrowed` | Top 3 borrowed books and single most active member; equal counts resolved by ascending ID |
-| F2.6 | `/library/authors` | Every author's book count including zero, books with author/publisher in the same country |
-| Bonus | F2.1 search handler | PyMySQL `%s` placeholders and a separate parameter tuple; no user input is interpolated into SQL |
-| Lab 3 retained | `/library` | Author/book CRUD, book covers, author photos; book forms include year/publisher/category |
-
-Every SELECT used by the new pages is in `problem2_Queries.sql`, with the required `-- F2.x` comments. It can run directly in the MySQL client. The F2.1 example uses MySQL variables: edit the four SET values to try filters (`NULL` category means all). The live website uses the corresponding queries from `website/library_queries.py` with bound values. PyMySQL handles parameter binding through `execute(sql, values)`; it is not a manually concatenated SQL search.
-
-## Schema and seed cases
-
-The assignment's six tables live in `library`: `author`, `publisher`, `category`, `book`, `member`, `loan`. Every table has a primary key. Books reference authors, publishers and categories; loans reference books and members. Deleting an author cascades to books, and deleting a book cascades to loans. `return_date IS NULL` means the book is still borrowed. Optional `author.photo` and `book.cover` columns preserve Lab 3 image uploads. Prices use DECIMAL; required foreign keys and valid loan date order are enforced.
-
-| Required seed condition | Seed example |
+| Student | Student ID |
 |---|---|
-| At least 4 authors / 3 publishers / 3 categories / 10 books / 5 members / 12 loans | 7 / 5 / 4 / 13 / 5 / 12 |
+| Mahmoud Hassan Elragal | 2304247 |
+| Marwan Tamer Hassan | 2304015 |
+
+## Project Overview
+
+This project implements Part II (Problem 2) of Database Lab 4. It extends the Lab 3 Flask website with a six-table MySQL library database and the search and reporting features specified in F2.1-F2.6. The bonus requirement is implemented using parameterized queries in the book search form.
+
+## Software Requirements
+
+- Python 3
+- MySQL 8 with a running database server
+- MySQL Workbench or the MySQL command-line client
+- Python dependencies listed in `website/requirements.txt`
+
+## Installation and Execution
+
+Run the following commands from the project root folder.
+
+### 1. Install Python Dependencies
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r website/requirements.txt
+```
+
+### 2. Initialize the Databases
+
+In MySQL Workbench, connect to the local MySQL server and open and execute the following scripts in order:
+
+1. `website/database/schema.sql`
+2. `problem2_DDL.sql`
+3. `problem2_DML.sql`
+4. `problem2_Queries.sql`
+
+Alternatively, start the MySQL command-line client from the project root:
+
+```powershell
+mysql -u root -p
+```
+
+Then execute:
+
+```sql
+SOURCE website/database/schema.sql;
+SOURCE problem2_DDL.sql;
+SOURCE problem2_DML.sql;
+SOURCE problem2_Queries.sql;
+exit;
+```
+
+The `registration` database stores user accounts and to-do records retained from the previous assignment. The `library` database stores the six library tables. The registration setup creates missing tables without deleting existing accounts.
+
+**Re-running `problem2_DDL.sql` deletes and recreates the `library` database.** Run the seed script once after creating the database. Books and authors subsequently added through the website are stored in MySQL; they do not automatically modify the seed SQL file.
+
+### 3. Configure the Application
+
+```powershell
+Copy-Item website/.env.example website/.env
+```
+
+Edit `website/.env` using the credentials and port of the MySQL connection:
+
+```dotenv
+DB_HOST=127.0.0.1
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_PORT=3306
+DB_NAME=registration
+LIBRARY_DB_NAME=library
+SECRET_KEY=replace_with_a_long_random_value
+```
+
+Generate a secret key with:
+
+```powershell
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+The local `.env` file is excluded from version control. The MySQL user must have access to both databases.
+
+### 4. Run the Website
+
+```powershell
+.\.venv\Scripts\python.exe website/app.py
+```
+
+Open [http://127.0.0.1:5000](http://127.0.0.1:5000), register an account or sign in, and select **Library**. Registration retains the previous assignment's validation for Gmail, iCloud, Hotmail, Yahoo and Outlook email addresses. The new library features are available through the navigation menu.
+
+## Implemented Requirements
+
+| Requirement | Page | Functionality |
+|---|---|---|
+| F2.1 | Search books | Filters titles using `LIKE`, prices using inclusive `BETWEEN`, and books by category; sorts results by ascending price |
+| F2.2 | Catalogue | Displays book details with author, publisher and category names using joins |
+| F2.3 | Reports | Displays book counts and average prices per category, authors with at least two books using `HAVING`, and total, minimum and maximum book prices |
+| F2.4 | Loans | Displays unreturned loans with book and member names, members without loans, and books never borrowed |
+| F2.5 | Most borrowed | Displays the three most borrowed books and the member with the most loans using grouping, sorting and `LIMIT` |
+| F2.6 | Authors and books | Displays every author's book count, including zero, and books whose author and publisher share a country |
+| Bonus | Search books | Passes user-entered values separately through PyMySQL `%s` placeholders in `cursor.execute(sql, values)` |
+
+The SQL statements for these pages are provided in `problem2_Queries.sql` with the required `-- F2.x` labels. The F2.1 example uses MySQL variables for direct execution in Workbench or the command-line client. The application uses the corresponding parameterized query from `website/library_queries.py`.
+
+Author and book management from Lab 3 is retained, including image uploads. The website also supports light and dark themes. Selecting a category automatically applies the search filters.
+
+## Database Design
+
+| Table | Primary Key | Foreign Keys |
+|---|---|---|
+| `author` | `author_id` | - |
+| `publisher` | `publisher_id` | - |
+| `category` | `category_id` | - |
+| `book` | `book_id` | `author_id`, `publisher_id`, `category_id` |
+| `member` | `member_id` | - |
+| `loan` | `loan_id` | `book_id`, `member_id` |
+
+Deleting an author cascades to that author's books. Deleting a book cascades to its loans. A `NULL` return date identifies a loan that has not been returned. Optional `cover` and `photo` columns store the filenames used for book covers and author photos.
+
+## Seed Data
+
+The seed script contains **7 authors, 5 publishers, 4 categories, 13 books, 5 members and 12 loans**.
+
+| Required Test Case | Seed Example |
+|---|---|
 | Two authors from the same country | Naguib Mahfouz and Taha Hussein: Egypt |
-| Author without books | Taha Hussein (5) |
-| Author with at least 2 books | Naguib Mahfouz has 3 |
-| Author and publisher from same country | Naguib Mahfouz / Dar El Shorouk: Egypt |
-| Book priced between 15 and 20 | Palace Walk: 18.50; includes exact boundary prices 15.00 and 20.00 |
-| Never-borrowed book | The ABC Murders (10), plus 5, 7 and 9 |
-| Member without loans | Youssef Mostafa (5) |
-| Unreturned loan | Loans 4, 7 and 12 |
-| Science books | A Brief History of Time, The Universe in a Nutshell, and Cosmos |
+| An author without books | Taha Hussein |
+| An author with at least two books | Naguib Mahfouz |
+| An author and publisher from the same country | Naguib Mahfouz and Dar El Shorouk: Egypt |
+| A book priced between 15 and 20 | Palace Walk: 18.50 |
+| A book never borrowed | The ABC Murders |
+| A member without loans | Youssef Mostafa |
+| An unreturned loan | Loans 4, 7 and 12 |
 
-Seeded top books: Palace Walk (4 loans), Murder on the Orient Express (3), One Hundred Years of Solitude (2). Top member: Ahmed Ali (5 loans). Total book prices: 213.99. These are demonstration prices, not current market prices.
+The Science category contains *A Brief History of Time*, *The Universe in a Nutshell* and *Cosmos*. Book covers and author photos are included in `website/static/uploads/`, and their filenames are included in the seed script.
 
-All 13 seeded books include their uploaded covers, and all 7 seeded authors include their uploaded photos. The image files are bundled in `website/static/uploads/`; `problem2_DML.sql` restores their filenames when installing the database. Keep this folder in your GitHub repository. Existing database image links are already configured, so no database reset is needed for this packaging update.
+## Submitted Files
 
-## Files for Part II
+```text
+lab4-2304247-2304015/
+|-- problem2_DDL.sql
+|-- problem2_DML.sql
+|-- problem2_Queries.sql
+|-- README.md
+`-- website/
+    |-- app.py
+    |-- library_queries.py
+    |-- requirements.txt
+    |-- .env.example
+    |-- database/
+    |-- templates/
+    `-- static/
+```
 
-- `problem2_DDL.sql`: repeatable six-table library schema.
-- `problem2_DML.sql`: seed rows for every required case.
-- `problem2_Queries.sql`: executable SQL for F2.1-F2.6.
-- `website/`: extended original Flask app and pages.
-- `README.md`: step-by-step setup and usage.
-
-This repository contains the Part II library assignment and its prepared-search bonus. Submit the GitHub repository link through the assignment form when ready.
+- `problem2_DDL.sql`: database creation, tables, constraints and relationships.
+- `problem2_DML.sql`: seed data and image filenames.
+- `problem2_Queries.sql`: SQL statements for F2.1-F2.6.
+- `website/`: application source, templates, styles and uploaded image assets.
+- `README.md`: project description and setup instructions.
